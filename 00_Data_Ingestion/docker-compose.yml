@@ -1,0 +1,179 @@
+# Define reusable x-airflow-common settings
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.7.3 # Use a specific version
+  env_file:
+    - .env
+  environment:
+    &airflow-common-env
+    # Airflow Base Environment Variables
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    # SequentialExecutor 
+    # Start simple, can change later (e.g., CeleryExecutor)
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    # --- USE CORRECT ENV VAR FOR DB CONNECTION ---
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow # Correct variable name
+    # --- END CHANGE ---
+    # Set AIRFLOW_UID to your host user ID to avoid permission issues with mounted volumes
+    # Run `id -u` in your terminal to find your user ID
+    AIRFLOW_UID: ${AIRFLOW_UID:-50000} # Default to 50000 if not set in .env or shell
+    _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-docker==3.7.0
+  volumes:
+    - ./dags:/opt/airflow/dags:ro # Mount DAGs read-only
+    - ./logs:/opt/airflow/logs
+    - ./config:/opt/airflow/config # If you have airflow.cfg overrides
+    # Mount the project directory to allow docker compose commands inside airflow
+    - .:/opt/airflow/project:rw
+    # Mount Docker socket to allow Airflow to run docker commands
+    - /var/run/docker.sock:/var/run/docker.sock
+  user: "${AIRFLOW_UID:-50000}" # Run containers as host user
+  depends_on:
+    - postgres
+  networks:
+      - data_ingestion_net
+
+# Define reusable x-python-app-base settings (keep existing)
+x-python-app-base: &python-app-base
+    build: .
+    image: localuser/data_ingestion_app:${APP_VERSION:-latest} # Ensure 'localuser' is your prefix
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      # Use the internal Kafka hostname
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - kafka
+    networks:
+      - data_ingestion_net
+    # volumes: # Keep if needed for development
+    #  - ./src:/app/src
+
+services:
+  # --- Kafka and Zookeeper (Keep Existing) ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    # No ports needed for internal communication if not accessed from host
+    # ports:
+    #   - "2181:2181"
+    networks:
+      - data_ingestion_net
+    healthcheck: # Added healthcheck for Zookeeper
+      test: ["CMD-SHELL", "echo stat | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka:
+    image: confluentinc/cp-kafka:7.3.2
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy # Kafka depends on Zookeeper being healthy
+    # No ports needed if only accessed by other containers on the same network
+    # ports:
+    #   - "9092:9092"
+    #   - "29092:29092"
+    
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      # --- SIMPLIFIED LISTENER CONFIG ---
+      # REMOVED: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERBROKER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092 # Listener for internal Docker network comms
+      # REMOVED: KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERBROKER
+      # --- END CHANGE ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1 # May not be needed if not using Confluent features
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1 # May not be needed
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - data_ingestion_net
+
+  # --- Airflow Base Services ---
+  postgres:
+    image: postgres:15 # Use a specific version
+    container_name: postgres_airflow
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    # No ports needed if only accessed by airflow containers
+    # ports:
+    #   - "5432:5432"
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    networks:
+      - data_ingestion_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    command: ["bash", "-c", "airflow db init && airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password airflow || airflow users list"] # Added fallback for user create
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # --- Airflow Core Services ---
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: airflow webserver
+    ports:
+      - "8080:8080" # Keep this to access the UI from host
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: airflow scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # --- Python Application Services ---
+  idealista_producer:
+    <<: *python-app-base
+    container_name: idealista_producer
+
+  idealista_consumer:
+    <<: *python-app-base
+    container_name: idealista_consumer
+    command: python src/idealista/consumer.py
+    restart: unless-stopped
+
+  interest_rate_producer:
+    <<: *python-app-base
+    container_name: interest_rate_producer
+
+  interest_rate_consumer:
+    <<: *python-app-base
+    container_name: interest_rate_consumer
+    command: python src/interest_rate/consumer.py
+    restart: unless-stopped
+
+networks:
+  data_ingestion_net:
+    driver: bridge
+
+volumes:
+  airflow_db_data:

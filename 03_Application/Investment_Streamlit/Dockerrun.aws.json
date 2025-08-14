@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "008405939996.dkr.ecr.eu-west-1.amazonaws.com/streamlit-app:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "8501"
+    }
+  ]
+}
+

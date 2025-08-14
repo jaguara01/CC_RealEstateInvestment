@@ -1,0 +1,7 @@
+pandas
+boto3
+kafka-python
+python-dotenv
+numpy
+requests
+atproto
