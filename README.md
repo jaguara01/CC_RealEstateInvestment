@@ -1,5 +1,9 @@
 # InmoDecision: A Data-Driven Advisor for Real Estate Investment with Social Sentiment Analysis
 
+This project showcases the design and implementation of a complete, end-to-end Big Data pipeline on a modern cloud architecture. The primary goal was to build a production-ready system that handles the entire data lifecycle: from real-time and batch ingestion using Apache Kafka and Python, through distributed processing with Apache Spark, to final consumption in an AWS Redshift data warehouse. The result is a sophisticated, scalable solution that transforms raw, diverse data into actionable insights via a user-facing Streamlit application.
+
+![Tech](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/tech.png)
+
 ## 1. Project Overview and Goals
 
 ### The Challenge: Navigating the Modern Real Estate Market
@@ -58,15 +62,17 @@ An interactive **Streamlit app** for user-friendly property exploration:
 - **Investment Plan**  
   Projects future cash flows & profitability
 
-  ![Architecture](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Dash.png)
+  ![Projection](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Slack2.png)
 
 - **Listings Explorer**  
-  Map of Barcelona with property filters (price, rooms, bathrooms, etc.)  
+  Map of Barcelona with property filters (price, rooms, bathrooms, etc.)
+  
+![Listing](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Listing.png)
 
 - **Sentiment Analysis**  
   Analyzes **Bluesky posts** for market sentiment  
 
-*(Image: Investment dashboard showing property features, financing, and ROI summary)*
+![Sentiment](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/sentiment.png)
 
 ---
 
@@ -82,7 +88,8 @@ Specialized app for **instant property alerts**:
 - **Slack Notifications**  
   Alerts when undervalued properties appear  
 
-*(Image: Slack alerts showing undervalued property notifications)*
+![Slack](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Slack1.png)
+![Slack_Detail](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Slack2.png)
 
 ---
 
@@ -141,36 +148,38 @@ Specialized app for **instant property alerts**:
 - **Frontend Deployment:** AWS Elastic Beanstalk (Streamlit app)  
 - **CI/CD:** GitHub Actions + Amazon ECR  
 - **Networking:** Amazon VPC with NAT Gateway  
-- **Monitoring & Security:** CloudWatch + IAM policies  
-- **IaC:** AWS CloudFormation  
+- **Monitoring & Security:** CloudWatch + IAM policies   
 
 ---
 
-## 6. Development Methodology
-Follows **Twelve-Factor App** methodology:  
-- Code in version control  
-- Dependencies explicitly declared  
-- Config via environment  
-- Logs as event streams  
+## 6. Conclusions and Future Work
+
+### Conclusion
+The InmoDecision project successfully demonstrates the design, implementation, and deployment of a comprehensive, cloud-native Big Data application. By building a sophisticated, multi-layered data architecture on AWS, this project proves it is possible to transform vast amounts of raw, disparate data into a cohesive and valuable tool for real estate investment analysis. The platform effectively integrates historical market data, real-time social media sentiment, and predictive machine learning to deliver actionable insights through an intuitive web application and a real-time alerting system. This project not only meets its initial objectives but also serves as a robust, scalable foundation for a production-grade data product.
 
 ---
 
-## 7. Challenges and Solutions
+### Key Achievements
+- **Successfully Engineered a Scalable, Cloud-Native Platform**  
+  A complete, end-to-end data intelligence platform was built from the ground up, leveraging a serverless-first approach with AWS Fargate, S3, and Redshift Serverless. The architecture is designed for scalability, security, and maintainability, following modern DevOps and Twelve-Factor App principles.
 
-- **Network Connectivity:** Fixed ECS private subnet issue via NAT Gateway  
-- **IAM Permissions:** Debugged failures by properly scoping IAM roles/policies  
-- **Frontend Deployment:** Migrated from EC2 → Elastic Beanstalk; scaled instances for performance  
+- **Integrated Diverse Data Sources with Machine Learning**  
+  The system effectively ingests and processes a wide variety of data—including structured government statistics, semi-structured geospatial data, and unstructured real-time social media text. This data is used to train and deploy a machine learning model for accurate property price prediction.
+
+- **Delivered Actionable Insights via Dashboards and Real-Time Alerts**  
+  The project culminates in tangible, user-facing applications that deliver real value. The Streamlit dashboard provides a rich, interactive environment for investment analysis, while the Slack-integrated alerting system offers immediate notifications on undervalued properties, turning data into timely opportunities.
 
 ---
 
-## 8. Conclusions and Future Work
+### Future Enhancements
+While the current platform is a powerful proof-of-concept, several key areas are identified for future development to evolve it into a fully-featured, production-ready service:
 
-**Achievements:**  
-- Built a scalable, cloud-native real estate intelligence platform  
-- Integrated diverse data sources & machine learning  
-- Delivered actionable insights via dashboards & alerts  
+- **Transition to a Fully AWS-Native Streaming Architecture**  
+  The current simulation of the Idealista data stream using Apache Kafka could be migrated to a fully managed, cloud-native solution using Amazon MSK (Managed Streaming for Kafka). This would enhance the reliability, scalability, and integration of the real-time data ingestion pipeline.
 
-**Future Enhancements:**  
-- Full AWS-native streaming with **MSK (Managed Kafka)**  
-- Improved **NLP sentiment models** across more platforms  
-- Advanced analytics: rental yields & neighborhood growth predictions  
+- **Improve NLP Sentiment Models and Expand Scope**  
+  The current sentiment analysis model could be enhanced with more advanced NLP techniques to better understand nuance, sarcasm, and context in social media posts. Furthermore, the sentiment analysis could be expanded to include data from other platforms (e.g., Twitter, real estate forums) to provide a more comprehensive view of market sentiment.
+
+- **Develop Advanced Analytical and Predictive Features**  
+  The analytical capabilities of the platform could be extended by developing more complex machine learning models. This includes creating models to forecast rental yields, predict neighborhood growth trends, and even use reinforcement learning to suggest optimal investment strategies based on user-defined risk profiles.
+
