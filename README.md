@@ -40,7 +40,10 @@ The project demonstrates expertise in **data engineering, cloud computing, and d
    - **Streamlit dashboard** for exploration and investment scenarios
 
 5. **Cloud-Native & DevOps Best Practices**  
-   - Serverless-first (AWS Fargate, Redshift Serverless), Docker, CloudFormation, GitHub Actions  
+   - Serverless-first (AWS Fargate, Redshift Serverless), Docker, CloudFormation, GitHub Actions
+
+![Architecture](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/BDM%20Arquitecture.jpg)
+
 
 ---
 
@@ -53,7 +56,9 @@ An interactive **Streamlit app** for user-friendly property exploration:
   Predicts fair market value from property features  
 
 - **Investment Plan**  
-  Projects future cash flows & profitability  
+  Projects future cash flows & profitability
+
+  ![Architecture](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Dash.png)
 
 - **Listings Explorer**  
   Map of Barcelona with property filters (price, rooms, bathrooms, etc.)  
