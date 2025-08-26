@@ -61,7 +61,7 @@ An interactive **Streamlit app** for user-friendly property exploration:
 - **Investment Plan**  
   Projects future cash flows & profitability
 
-  ![Projection](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/Slack2.png)
+  ![Projection](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/proj.png)
 
 - **Listings Explorer**  
   Map of Barcelona with property filters (price, rooms, bathrooms, etc.)
