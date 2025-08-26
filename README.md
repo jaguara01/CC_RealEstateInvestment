@@ -2,7 +2,6 @@
 
 This project showcases the design and implementation of a complete, end-to-end Big Data pipeline on a modern cloud architecture. The primary goal was to build a production-ready system that handles the entire data lifecycle: from real-time and batch ingestion using Apache Kafka and Python, through distributed processing with Apache Spark, to final consumption in an AWS Redshift data warehouse. The result is a sophisticated, scalable solution that transforms raw, diverse data into actionable insights via a user-facing Streamlit application.
 
-![Tech](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/tech.png)
 
 ## 1. Project Overview and Goals
 
@@ -157,6 +156,7 @@ Specialized app for **instant property alerts**:
 ### Conclusion
 The InmoDecision project successfully demonstrates the design, implementation, and deployment of a comprehensive, cloud-native Big Data application. By building a sophisticated, multi-layered data architecture on AWS, this project proves it is possible to transform vast amounts of raw, disparate data into a cohesive and valuable tool for real estate investment analysis. The platform effectively integrates historical market data, real-time social media sentiment, and predictive machine learning to deliver actionable insights through an intuitive web application and a real-time alerting system. This project not only meets its initial objectives but also serves as a robust, scalable foundation for a production-grade data product.
 
+![Tech](https://github.com/jaguara01/CC_RealEstateInvestment/blob/main/img/tech.png)
 ---
 
 ### Key Achievements
